@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register — NoteFlow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #6C63FF;
+      --primary-dark: #554FCC;
+      --bg: #0F0F13;
+      --surface: #1A1A24;
+      --surface2: #22222F;
+      --border: #2E2E3E;
+      --text: #FFFFFF;
+      --text-muted: #8888AA;
+      --danger: #FF5757;
+      --success: #4CAF50;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .auth-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .auth-logo-icon {
+      width: 36px; height: 36px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex; align-items: center;
+      justify-content: center; font-size: 18px;
+    }
+    .auth-logo span { font-size: 18px; font-weight: 700; }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label {
+      display: block; font-size: 12px;
+      font-weight: 500; margin-bottom: 5px;
+      color: var(--text-muted);
+    }
+    input {
+      width: 100%; padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-size: 13px; font-family: 'Inter', sans-serif;
+      outline: none; transition: border 0.2s;
+    }
+    input:focus { border-color: var(--primary); }
+    .btn-primary {
+      width: 100%; padding: 11px;
+      background: var(--primary); color: white;
+      border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; margin-top: 4px;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .auth-footer {
+      text-align: center; margin-top: 16px;
+      font-size: 13px; color: var(--text-muted);
+    }
+    .auth-footer a { color: var(--primary); text-decoration: none; }
+    .error-msg {
+      color: var(--danger); font-size: 11px;
+      margin-top: 3px; display: none;
+    }
+    .toast {
+      position: fixed; bottom: 20px; right: 20px;
+      padding: 12px 18px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      opacity: 0; transform: translateY(10px);
+      transition: all 0.3s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: var(--success); color: white; }
+    .toast.error { background: var(--danger); color: white; }
+  </style>
+</head>
+<body>
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">📝</div>
+      <span>NoteFlow</span>
+    </div>
+    <h1>Create account</h1>
+    <p class="subtitle">Start writing your thoughts today</p>
+
+    <div class="form-group">
+      <label>Full name</label>
+      <input type="text" id="name" placeholder="John Doe" />
+      <div class="error-msg" id="name-error"></div>
+    </div>
+    <div class="form-group">
+      <label>Email address</label>
+      <input type="email" id="email" placeholder="john@example.com" />
+      <div class="error-msg" id="email-error"></div>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Min 6 characters" />
+      <div class="error-msg" id="password-error"></div>
+    </div>
+
+    <button class="btn-primary" id="register-btn" onclick="handleRegister()">
+      Create account
+    </button>
+
+    <div class="auth-footer">
+      Already have an account? <a href="login.html">Sign in</a>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = 'http://localhost:5000/api/v1';
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast show ' + type;
+      setTimeout(() => { toast.className = 'toast'; }, 3000);
+    }
+
+    function showError(id, message) {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.style.display = 'block';
+    }
+
+    function clearErrors() {
+      document.querySelectorAll('.error-msg').forEach(el => {
+        el.textContent = '';
+        el.style.display = 'none';
+      });
+    }
+
+    async function handleRegister() {
+      clearErrors();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      let valid = true;
+      if (!name) { showError('name-error', 'Name is required'); valid = false; }
+      if (!email) { showError('email-error', 'Email is required'); valid = false; }
+      if (!password || password.length < 6) { showError('password-error', 'Min 6 characters'); valid = false; }
+      if (!valid) return;
+
+      const btn = document.getElementById('register-btn');
+      btn.textContent = 'Creating account...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          localStorage.setItem('accessToken', data.data.accessToken);
+          localStorage.setItem('user', JSON.stringify({ id: data.data.id, name: data.data.name, email: data.data.email }));
+          showToast('Account created!');
+          setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+        } else {
+          showToast(data.message || 'Registration failed', 'error');
+          btn.textContent = 'Create account';
+          btn.disabled = false;
+        }
+      } catch (err) {
+        showToast('Make sure backend is running on port 5000', 'error');
+        btn.textContent = 'Create account';
+        btn.disabled = false;
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleRegister();
+    });
+  </script>
+</body>
+</html>
