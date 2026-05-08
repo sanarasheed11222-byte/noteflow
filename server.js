@@ -1,9 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const authRoutes = require('./routes/authRoutes');
-const notesRoutes = require('./routes/notesRoutes');
-const errorMiddleware = require('./middleware/errorMiddleware');
+const authRoutes = require('./backend/routes/authRoutes');
+const notesRoutes = require('./backend/routes/notesRoutes');
+const errorMiddleware = require('./backend/middleware/errorMiddleware');
 
 dotenv.config();
 
