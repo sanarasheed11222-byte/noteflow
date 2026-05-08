@@ -11,16 +11,5 @@
       "src": "/(.*)",
       "dest": "backend/server.js"
     }
-  ],
-  "env": {
-    "DB_HOST": "tramway.proxy.rlwy.net",
-    "DB_PORT": "49235",
-    "DB_USER": "root",
-    "DB_PASSWORD": "LKtljpPptqbKAmYrGvxDNdhjCWQDPKlS",
-    "DB_NAME": "railway",
-    "JWT_SECRET": "mynoteflowsecretkey123456789",
-    "JWT_EXPIRE": "7d",
-    "REFRESH_TOKEN_SECRET": "myrefreshsecretkey987654321",
-    "REFRESH_TOKEN_EXPIRE": "30d"
-  }
+  ]
 }
